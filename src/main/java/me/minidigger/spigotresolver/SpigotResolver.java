@@ -5,8 +5,11 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -18,16 +21,19 @@ import javafx.util.Pair;
 public class SpigotResolver {
 
     Gson gson = new Gson();
+    Date date = new Date();
 
     public static void main(String[] args) throws Exception {
         new SpigotResolver().resolve();
     }
 
     public void resolve() throws Exception {
+        // get all versions
         List<String> files = getFiles();
 
         List<Info> infos = new CopyOnWriteArrayList<>();
 
+        // get the info for those versions
         files.parallelStream().forEach(v -> {
             try {
                 infos.add(getInfo(v));
@@ -36,18 +42,25 @@ public class SpigotResolver {
             }
         });
 
+        // sort based of semver
         infos.sort(Comparator.comparing((Info a) -> Integer.parseInt(a.version.split("\\.")[1])).thenComparing((Info a) -> {
             String ver = a.version.split("\\.")[2];
             return ver.equals("json") ? 0 : Integer.parseInt(ver);
         }));
 
+        // generate bbcode
         List<String> page = generatePage(infos);
+
+        // print it all
         page.forEach(System.out::println);
     }
 
     private List<String> generatePage(List<Info> infos) {
         List<String> result = new ArrayList<>();
-        result.add("This page is automatically generated using this tool by MiniDigger: ");
+        result.add("This page is automatically generated using this tool by MiniDigger: [URL='https://github.com/MiniDigger/spigot-resolver']Spigot Resolver[/URL]");
+        result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
+        result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
+        result.add("");
         result.add("[LIST]");
         for (Info info : infos) {
             result.add("[*]" + info.version.replace(".json", ""));
@@ -61,6 +74,8 @@ public class SpigotResolver {
             result.add("[*][/LIST]");
         }
         result.add("[/LIST]");
+        String ms = new Date().getTime() - date.getTime() + "";
+        result.add("Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replace("T", " ") + " in " + ms + " ms.");
         return result;
     }
 
@@ -99,6 +114,7 @@ public class SpigotResolver {
         info.craftbukkitLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/browse?at=" + ver.refs.CraftBukkit;
         info.spigotLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot/browse?at=" + ver.refs.Spigot;
 
+        // get nms and bukkit version from pom
         Pair<String, String> pom = resolvePom(ver.refs.CraftBukkit);
         info.nmsVersion = pom.getKey();
         info.bukkitVersion = pom.getValue();
@@ -113,11 +129,11 @@ public class SpigotResolver {
         String nmsVersion = "ERROR";
         String cbVersion = "ERROR";
         while ((inputLine = in.readLine()) != null) {
-            if (inputLine.contains("minecraft_version")) {
+            if (inputLine.contains("<version>")) {
+                cbVersion = inputLine.split("[><]")[2];
+            } else if (inputLine.contains("minecraft_version")) {
                 nmsVersion = inputLine.split("[><]")[2];
                 break;
-            } else if (inputLine.contains("<version>")) {
-                cbVersion = inputLine.split("[><]")[2];
             }
         }
 
