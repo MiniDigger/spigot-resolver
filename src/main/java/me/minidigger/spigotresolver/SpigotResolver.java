@@ -36,7 +36,12 @@ public class SpigotResolver {
         // get the info for those versions
         files.parallelStream().forEach(v -> {
             try {
-                infos.add(getInfo(v));
+                Info info = getInfo(v);
+                if (info.version.contains("pre")) {
+                    System.out.println("Skipping snapshot " + info.version);
+                } else {
+                    infos.add(info);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
