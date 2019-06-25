@@ -13,8 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javafx.util.Pair;
-
 /**
  * Created by Martin on 15-Apr-17.
  */
@@ -65,8 +63,10 @@ public class SpigotResolver {
         result.add("This page is automatically generated using this tool by MiniDigger: [URL='https://github.com/MiniDigger/spigot-resolver']Spigot Resolver[/URL]");
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
+        result.add("Be sure to checkout the thread too [URL='https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194']here[/URL]");
         result.add("");
         result.add("[LIST]");
+        Info last = null;
         for (Info info : infos) {
             result.add("[*]" + info.version.replace(".json", ""));
             result.add("[LIST]");
@@ -76,12 +76,23 @@ public class SpigotResolver {
             result.add("[*][URL='" + info.craftbukkitLink + "']CraftBukkit Link[/URL]");
             result.add("[*][URL='" + info.spigotLink + "']Spigot Link[/URL]");
             result.add("[*][URL='" + info.buildDataLink + "']BuildData Link[/URL]");
+            if(last != null) {
+                result.add("[*][URL='" + getDiffUrl(info.ver.refs.Bukkit, last.ver.refs.Bukkit, "Bukkit") + "']Bukkit-Changes[/URL]");
+                result.add("[*][URL='" + getDiffUrl(info.ver.refs.CraftBukkit, last.ver.refs.CraftBukkit, "CraftBukkit") + "']CraftBukkit-Changes[/URL]");
+                result.add("[*][URL='" + getDiffUrl(info.ver.refs.Spigot, last.ver.refs.Spigot, "Spigot") + "']Spigot-Changes[/URL]");
+                result.add("[*][URL='" + getDiffUrl(info.ver.refs.BuildData, last.ver.refs.BuildData, "BuildData") + "']Mapping-Changes[/URL]");
+            }
             result.add("[*][/LIST]");
+            last = info;
         }
         result.add("[/LIST]");
         String ms = new Date().getTime() - date.getTime() + "";
         result.add("Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replace("T", " ") + " in " + ms + " ms.");
         return result;
+    }
+
+    private String getDiffUrl(String curr, String old, String repo) {
+        return String.format("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/%s/compare/diff?targetBranch=%s&sourceBranch=%s", repo, old, curr);
     }
 
     private List<String> getFiles() throws Exception {
@@ -118,16 +129,17 @@ public class SpigotResolver {
         info.bukkitLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse?at=" + ver.refs.Bukkit;
         info.craftbukkitLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/browse?at=" + ver.refs.CraftBukkit;
         info.spigotLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot/browse?at=" + ver.refs.Spigot;
+        info.ver = ver;
 
         // get nms and bukkit version from pom
-        Pair<String, String> pom = resolvePom(ver.refs.CraftBukkit);
-        info.nmsVersion = pom.getKey();
-        info.bukkitVersion = pom.getValue();
+        Versions pom = resolvePom(ver.refs.CraftBukkit);
+        info.nmsVersion = pom.minecraft;
+        info.bukkitVersion = pom.craftbukkit;
 
         return info;
     }
 
-    private Pair<String, String> resolvePom(String craftbukkitCommit) throws Exception {
+    private Versions resolvePom(String craftbukkitCommit) throws Exception {
         URL url = new URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=" + craftbukkitCommit);
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         String inputLine;
@@ -142,7 +154,10 @@ public class SpigotResolver {
             }
         }
 
-        return new Pair<>(nmsVersion, cbVersion);
+        Versions versions = new Versions();
+        versions.craftbukkit = cbVersion;
+        versions.minecraft = nmsVersion;
+        return versions;
     }
 
     class Version {
@@ -187,6 +202,7 @@ public class SpigotResolver {
         String craftbukkitLink;
         String bukkitLink;
         String spigotLink;
+        Version ver;
 
         @Override
         public String toString() {
@@ -199,5 +215,10 @@ public class SpigotResolver {
                     ", spigotLink='" + spigotLink + '\'' +
                     '}';
         }
+    }
+
+    class Versions {
+        String craftbukkit;
+        String minecraft;
     }
 }
