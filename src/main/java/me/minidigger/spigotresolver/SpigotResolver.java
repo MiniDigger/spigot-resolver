@@ -46,10 +46,8 @@ public class SpigotResolver {
         });
 
         // sort based of semver
-        infos.sort(Comparator.comparing((Info a) -> Integer.parseInt(a.version.split("\\.")[1])).thenComparing((Info a) -> {
-            String ver = a.version.split("\\.")[2];
-            return ver.equals("json") ? 0 : Integer.parseInt(ver);
-        }));
+        infos.sort(Comparator.comparing((Info a) -> Integer.parseInt(a.version.split("\\.")[1]))
+            .thenComparing((Info a) -> Integer.parseInt( (a.version + ".0").split("\\.")[2])));
 
         // generate bbcode
         List<String> page = generatePage(infos);
@@ -67,23 +65,48 @@ public class SpigotResolver {
         result.add("");
         result.add("[LIST]");
         Info last = null;
+        Info lastMajor = null;
         for (Info info : infos) {
-            result.add("[*]" + info.version.replace(".json", ""));
+            if(info.major) {
+                result.add("[*][B][SIZE=5]" + info.version + "[/SIZE][/B]");
+            }else {
+                result.add("[*]" + info.version);
+            }
+
             result.add("[LIST]");
+
             result.add("[*]NMS Version: " + info.nmsVersion);
             result.add("[*]Bukkit Version: " + info.bukkitVersion);
             result.add("[*][URL='" + info.bukkitLink + "']Bukkit Link[/URL]");
             result.add("[*][URL='" + info.craftbukkitLink + "']CraftBukkit Link[/URL]");
             result.add("[*][URL='" + info.spigotLink + "']Spigot Link[/URL]");
             result.add("[*][URL='" + info.buildDataLink + "']BuildData Link[/URL]");
+
             if(last != null) {
                 result.add("[*][URL='" + getDiffUrl(info.ver.refs.Bukkit, last.ver.refs.Bukkit, "Bukkit") + "']Bukkit-Changes[/URL]");
                 result.add("[*][URL='" + getDiffUrl(info.ver.refs.CraftBukkit, last.ver.refs.CraftBukkit, "CraftBukkit") + "']CraftBukkit-Changes[/URL]");
                 result.add("[*][URL='" + getDiffUrl(info.ver.refs.Spigot, last.ver.refs.Spigot, "Spigot") + "']Spigot-Changes[/URL]");
                 result.add("[*][URL='" + getDiffUrl(info.ver.refs.BuildData, last.ver.refs.BuildData, "BuildData") + "']Mapping-Changes[/URL]");
             }
+
+            if(info.major) {
+                if(lastMajor != null) {
+                    result.add("[*]Changes between " + info.version + " and " + lastMajor.version + "");
+                    result.add("[LIST]");
+                    result.add("[*][URL='" + getDiffUrl(info.ver.refs.Bukkit, lastMajor.ver.refs.Bukkit, "Bukkit") + "']Bukkit-Changes[/URL]");
+                    result.add("[*][URL='" + getDiffUrl(info.ver.refs.CraftBukkit, lastMajor.ver.refs.CraftBukkit, "CraftBukkit") + "']CraftBukkit-Changes[/URL]");
+                    result.add("[*][URL='" + getDiffUrl(info.ver.refs.Spigot, lastMajor.ver.refs.Spigot, "Spigot") + "']Spigot-Changes[/URL]");
+                    result.add("[*][URL='" + getDiffUrl(info.ver.refs.BuildData, lastMajor.ver.refs.BuildData, "BuildData") + "']Mapping-Changes[/URL]");
+                    result.add("[/LIST]");
+                }
+            }
+
             result.add("[*][/LIST]");
+
             last = info;
+            if(info.major) {
+                lastMajor = info;
+            }
         }
         result.add("[/LIST]");
         String ms = new Date().getTime() - date.getTime() + "";
@@ -123,7 +146,8 @@ public class SpigotResolver {
         in.close();
 
         Info info = new Info();
-        info.version = version;
+        info.version = version.replace(".json", "");
+        info.major = version.length() - version.replace(".", "").length() > 2 ? false : true;
 
         info.buildDataLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/browse?at=" + ver.refs.BuildData;
         info.bukkitLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse?at=" + ver.refs.Bukkit;
@@ -196,6 +220,7 @@ public class SpigotResolver {
 
     class Info {
         String version;
+        boolean major;
         String nmsVersion;
         String bukkitVersion;
         String buildDataLink;
