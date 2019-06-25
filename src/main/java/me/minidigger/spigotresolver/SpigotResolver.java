@@ -50,23 +50,39 @@ public class SpigotResolver {
             .thenComparing((Info a) -> Integer.parseInt( (a.version + ".0").split("\\.")[2])));
 
         // generate bbcode
-        List<String> page = generatePage(infos);
+        List<String> page = generatePage(infos, true);
 
         // print it all
         page.forEach(System.out::println);
+
+        System.out.println("\n\n\n\n");
+
+        // and the same for the second page
+        page = generatePage(infos, false);
+        page.forEach(System.out::println);
     }
 
-    private List<String> generatePage(List<Info> infos) {
+    private List<String> generatePage(List<Info> infos, boolean legacy) {
         List<String> result = new ArrayList<>();
         result.add("This page is automatically generated using this tool by MiniDigger: [URL='https://github.com/MiniDigger/spigot-resolver']Spigot Resolver[/URL]");
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
         result.add("Be sure to checkout the thread too [URL='https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194']here[/URL]");
+        result.add("1.8 -> 1.8.8? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy']this page[/URL]");
+        result.add("1.9 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions']this page[/URL]");
         result.add("");
         result.add("[LIST]");
         Info last = null;
         Info lastMajor = null;
         for (Info info : infos) {
+            if((info.version.contains("1.8") && !legacy) || (!info.version.contains("1.8") && legacy)) {
+                last = info;
+                if(info.major) {
+                    lastMajor = info;
+                }
+                continue;
+            }
+
             if(info.major) {
                 result.add("[*][B][SIZE=5]" + info.version + "[/SIZE][/B]");
             }else {
