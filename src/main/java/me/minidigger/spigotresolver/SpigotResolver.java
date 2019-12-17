@@ -68,14 +68,14 @@ public class SpigotResolver {
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
         result.add("Be sure to checkout the thread too [URL='https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194']here[/URL]");
-        result.add("1.8 -> 1.8.8? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy']this page[/URL]");
-        result.add("1.9 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions']this page[/URL]");
+        result.add("1.8 and 1.9? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy']this page[/URL]");
+        result.add("1.10 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions']this page[/URL]");
         result.add("");
         result.add("[LIST]");
         Info last = null;
         Info lastMajor = null;
         for (Info info : infos) {
-            if((info.version.contains("1.8") && !legacy) || (!info.version.contains("1.8") && legacy)) {
+            if((isLegacy(info.version) && !legacy) || (!isLegacy(info.version) && legacy)) {
                 last = info;
                 if(info.major) {
                     lastMajor = info;
@@ -163,7 +163,7 @@ public class SpigotResolver {
 
         Info info = new Info();
         info.version = version.replace(".json", "");
-        info.major = version.length() - version.replace(".", "").length() > 2 ? false : true;
+        info.major = version.length() - version.replace(".", "").length() <= 2;
 
         info.buildDataLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/browse?at=" + ver.refs.BuildData;
         info.bukkitLink = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse?at=" + ver.refs.Bukkit;
@@ -198,6 +198,10 @@ public class SpigotResolver {
         versions.craftbukkit = cbVersion;
         versions.minecraft = nmsVersion;
         return versions;
+    }
+
+    private boolean isLegacy(String version) {
+        return version.startsWith("1.8") || version.startsWith("1.9");
     }
 
     class Version {
