@@ -2,6 +2,8 @@
 
 This is a small tool , to create a wiki over at spigotmc.org
 
+### These pages contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.
+
 Legacy versions 1.8 - 1.9 - https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy/
 
 Versions 1.10 - 1.15 - https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-10-1-15/
