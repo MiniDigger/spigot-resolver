@@ -16,7 +16,7 @@ Thread on spigotmc - https://www.spigotmc.org/threads/spigot-nms-and-minecraft-v
 To compile Spigot-Resolver , You need:
 
 + Internet connection
-+ JDK 8 or newer versions
++ JDK 8 or newer version of JDK
 
 ### You need to : 
 Clone this repo , and run this in the project directory:
