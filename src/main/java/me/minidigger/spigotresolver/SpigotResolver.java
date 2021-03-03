@@ -68,8 +68,9 @@ public class SpigotResolver {
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
         result.add("Be sure to checkout the thread too [URL='https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194']here[/URL]");
-        result.add("1.8 and 1.9? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy']this page[/URL]");
-        result.add("1.10 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions']this page[/URL]");
+        result.add("1.8 and 1.9? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy/']this page[/URL]");
+        result.add("1.10 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-10-1-15/']this page[/URL]");
+        result.add("1.16 and up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-16/']this page[/URL]");
         result.add("");
         result.add("[LIST]");
         Info last = null;
