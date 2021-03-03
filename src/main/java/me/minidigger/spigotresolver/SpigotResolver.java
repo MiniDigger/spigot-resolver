@@ -48,6 +48,7 @@ public class SpigotResolver {
         // sort based of semver
         infos.sort(Comparator.comparing((Info a) -> Integer.parseInt(a.version.split("\\.")[1]))
             .thenComparing((Info a) -> Integer.parseInt( (a.version + ".0").split("\\.")[2])));
+            .thenComparing((Info a) -> Integer.parseInt( (a.version + ".0").split("\\.")[3])));
 
         // generate bbcode
         List<String> page = generatePage(infos, true);
