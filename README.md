@@ -24,5 +24,9 @@ To compile Spigot-Resolver , You need:
 Clone this repo , and run this in the project directory:
 
 ```shell
-./gradlew clean build
+./gradlew clean build shadowjar
 ```
+
+The program should be in `/libs/build/`
+
+To run this program You need to be in this directory and run from terminal/cmd `java -jar shadow-all.jar`
