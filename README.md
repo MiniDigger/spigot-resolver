@@ -11,7 +11,7 @@ Versions 1.16 and up - https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-ve
 Thread on spigotmc - https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194/
 
 ---------------------------------------------------------------------------------
-## How To (Build it from source
+## How To: (Build it from source)
 
 To compile Spigot-Resolver , You need:
 
