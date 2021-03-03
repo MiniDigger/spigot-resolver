@@ -10,7 +10,7 @@ Versions 1.10 - 1.15 - https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-ve
 
 Versions 1.16 and up - https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-16/
 
-Thread on spigotmc - https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194/
+Forum Thread on spigotmc - https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194/
 
 ---------------------------------------------------------------------------------
 ## How To: (Build it from source)
