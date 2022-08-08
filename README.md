@@ -27,6 +27,6 @@ Clone this repo and run this in the project directory:
 ./gradlew clean build shadowjar
 ```
 
-The program should be located in `/libs/build/`
+The program should be located in `/build/libs/`
 
 To run this program you need to be in this directory and run from terminal/cmd `java -jar shadow-all.jar`
