@@ -1,11 +1,11 @@
 package me.minidigger.spigotresolver;
 
-import com.google.common.io.Files;
 import com.google.gson.Gson;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SpigotResolver {
 
     Gson gson = new Gson();
-    Date date = new Date();
 
     public static void main(String[] args) throws Exception {
         new SpigotResolver().resolve(args);
@@ -94,14 +93,12 @@ public class SpigotResolver {
             return;
         }
         
-        try(BufferedWriter fileWriter = Files.newWriter(file, StandardCharsets.UTF_8)){
+        try(BufferedWriter fileWriter = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)){
             
             fileWriter.write(String.join("\n", lines));
             fileWriter.close();
             
             System.out.println("[INFO] Content saved to " + file.getName());
-        }catch(FileNotFoundException ex){
-            System.out.println("[WARN] Could not save content to file. File does not exist!");
         }catch(IOException ex){
             System.out.println("[WARN] Encountered IOException while saving content to file.");
             ex.printStackTrace();
@@ -109,16 +106,20 @@ public class SpigotResolver {
     }
 
     private List<String> generatePage(List<Info> infos, boolean legacy) {
+        long start = System.currentTimeMillis();
+        LocalDateTime startDate = LocalDateTime.now();
+        
         List<String> result = new ArrayList<>();
         result.add("NOTE: Only copy and use the content between \"START PAGE CONTENT\" and \"END PAGE CONTENT\"");
         result.add("      Everything before or after is only for information and debug purposes.");
+        result.add("");
         result.add("---------------[ START PAGE CONTENT ]---------------");
         result.add("This page is automatically generated using this tool by MiniDigger: [URL='https://github.com/MiniDigger/spigot-resolver']Spigot Resolver[/URL]");
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
         result.add("Be sure to checkout the thread too [URL='https://www.spigotmc.org/threads/spigot-nms-and-minecraft-version-overview.233194']here[/URL]");
         result.add("1.8 and 1.9? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-legacy/']this page[/URL]");
-        result.add("1.10 up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-10-1-15/']this page[/URL]");
+        result.add("1.10 to 1.15? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-10-1-15/']this page[/URL]");
         result.add("1.16 and up? Look at [URL='https://www.spigotmc.org/wiki/spigot-nms-and-minecraft-versions-1-16/']this page[/URL]");
         result.add("");
         result.add("[LIST]");
@@ -175,9 +176,11 @@ public class SpigotResolver {
             }
         }
         result.add("[/LIST]");
+        result.add("");
         result.add("---------------[ END PAGE CONTENT ]---------------");
-        String ms = new Date().getTime() - date.getTime() + "";
-        result.add("[INFO] Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replace("T", " ") + " in " + ms + " ms.");
+        
+        long ms = System.currentTimeMillis() - start;
+        result.add("[INFO] Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(startDate).replace("T", " ") + " in " + ms + " ms.");
         return result;
     }
 
