@@ -1,10 +1,11 @@
 package me.minidigger.spigotresolver;
 
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -22,12 +23,20 @@ public class SpigotResolver {
     Date date = new Date();
 
     public static void main(String[] args) throws Exception {
-        new SpigotResolver().resolve();
+        new SpigotResolver().resolve(args);
     }
 
-    public void resolve() throws Exception {
+    public void resolve(String[] args) throws Exception {
         // get all versions
         List<String> files = getFiles();
+        boolean saveFile = false;
+        for(String arg : args){
+            if(arg.equalsIgnoreCase("--file")){
+                saveFile = true;
+                System.out.println("[INFO] Found --file flag. Will generate files.");
+                break;
+            }
+        }
 
         List<Info> infos = new CopyOnWriteArrayList<>();
 
@@ -54,16 +63,56 @@ public class SpigotResolver {
 
         // print it all
         page.forEach(System.out::println);
+        
+        // Save to a TXT file should the --file flage be given
+        if(saveFile){
+            System.out.println("[INFO] Saving content to legacy-spigot-versions.txt");
+            writeToFile(new File("./legacy-spigot-versions.txt"), page);
+        }
 
         System.out.println("\n\n\n\n");
 
         // and the same for the second page
         page = generatePage(infos, false);
         page.forEach(System.out::println);
+        
+        if(saveFile){
+            System.out.println("[INFO] Saving content to spigot-versions.txt");
+            writeToFile(new File("./spigot-versions.txt"), page);
+        }
+    }
+    
+    private void writeToFile(File file, List<String> lines){
+        try{
+            if(!file.exists() && !file.createNewFile()){
+                System.out.println("[WARN] Could not create file " + file.getName());
+                return;
+            }
+        }catch(IOException ex){
+            System.out.println("[WARN] Encountered IOException while saving content to file.");
+            ex.printStackTrace();
+            return;
+        }
+        
+        try(BufferedWriter fileWriter = Files.newWriter(file, StandardCharsets.UTF_8)){
+            
+            fileWriter.write(String.join("\n", lines));
+            fileWriter.close();
+            
+            System.out.println("[INFO] Content saved to " + file.getName());
+        }catch(FileNotFoundException ex){
+            System.out.println("[WARN] Could not save content to file. File does not exist!");
+        }catch(IOException ex){
+            System.out.println("[WARN] Encountered IOException while saving content to file.");
+            ex.printStackTrace();
+        }
     }
 
     private List<String> generatePage(List<Info> infos, boolean legacy) {
         List<String> result = new ArrayList<>();
+        result.add("NOTE: Only copy and use the content between \"START PAGE CONTENT\" and \"END PAGE CONTENT\"");
+        result.add("      Everything before or after is only for information and debug purposes.");
+        result.add("---------------[ START PAGE CONTENT ]---------------");
         result.add("This page is automatically generated using this tool by MiniDigger: [URL='https://github.com/MiniDigger/spigot-resolver']Spigot Resolver[/URL]");
         result.add("If the page is outdated go nag MiniDigger or just update it yourself using that tool");
         result.add("This page contains all versions of spigot you can build using buildtools (java -jar BuildTools.jar --rev <version>), together with the nms and bukkit (maven) version and links to the sources on stash for that version.");
@@ -126,8 +175,9 @@ public class SpigotResolver {
             }
         }
         result.add("[/LIST]");
+        result.add("---------------[ END PAGE CONTENT ]---------------");
         String ms = new Date().getTime() - date.getTime() + "";
-        result.add("Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replace("T", " ") + " in " + ms + " ms.");
+        result.add("[INFO] Generated on " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replace("T", " ") + " in " + ms + " ms.");
         return result;
     }
 
